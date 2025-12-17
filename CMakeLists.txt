@@ -1,2 +1,7 @@
-cmake_minimum_required(3.5...4.0)
+cmake_minimum_required(VERSION 3.5...4.0)
+project(python-from-fortran LANGUAGES CXX Fortran)
 add_executable(f main.f90)
+add_executable(cpp main.cpp)
+target_include_directories(cpp PRIVATE /opt/conda/include/python3.13)
+target_link_libraries(cpp PRIVATE python3.13)
+target_link_directories(cpp PRIVATE /opt/conda/lib)
