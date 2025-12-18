@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.5...4.0)
 project(python-from-fortran LANGUAGES CXX Fortran)
 add_executable(f main.f90)
-add_executable(cpp main.cpp)
+add_executable(cpp main.cpp
+        PythonRun.cpp
+        PythonRun.h)
 execute_process(COMMAND conda info --base OUTPUT_VARIABLE CONDA_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND ${CONDA_PREFIX}/bin/python --version OUTPUT_VARIABLE PYTHON_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
 string(REGEX REPLACE "^.* " "" PYTHON_VERSION "${PYTHON_VERSION}")
