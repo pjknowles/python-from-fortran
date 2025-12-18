@@ -153,13 +153,13 @@ int main(int argc, char* argv[])
 
     {
         auto start = std::chrono::high_resolution_clock::now();
-        int repeat = 1000;
+        int repeat = 10000;
         auto run = PythonRun();
         for (int i = 0; i < repeat; i++)
             run.run_string("i=1");
         auto finish = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> elapsed = finish - start;
-        std::cout << "Elapsed Time per instance: " << elapsed.count() / repeat << " milliseconds" << std::endl;
+        std::cout << "Elapsed Time per call: " << elapsed.count() / repeat << " milliseconds" << std::endl;
     }
 
     return 0;
