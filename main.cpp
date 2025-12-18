@@ -141,13 +141,26 @@ int main(int argc, char* argv[])
         std::cout << "stderr: " << run.err() << std::endl;
     }
 
-    auto start = std::chrono::high_resolution_clock::now();
-    int repeat = 100;
-    for (int i = 0; i < repeat; i++)
-        auto run = PythonRun("i=1");
-    auto finish = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> elapsed = finish - start;
-    std::cout << "Elapsed Time per instance: " << elapsed.count() / repeat << " milliseconds" << std::endl;
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        int repeat = 100;
+        for (int i = 0; i < repeat; i++)
+            auto run = PythonRun("i=1");
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> elapsed = finish - start;
+        std::cout << "Elapsed Time per instance: " << elapsed.count() / repeat << " milliseconds" << std::endl;
+    }
+
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        int repeat = 1000;
+        auto run = PythonRun();
+        for (int i = 0; i < repeat; i++)
+            run.run_string("i=1");
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> elapsed = finish - start;
+        std::cout << "Elapsed Time per instance: " << elapsed.count() / repeat << " milliseconds" << std::endl;
+    }
 
     return 0;
 }
