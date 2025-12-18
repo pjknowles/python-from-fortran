@@ -1,6 +1,7 @@
 #include <iostream>
 #include <Python.h>
 #include <filesystem>
+#include <chrono>
 
 class PythonRun
 {
@@ -139,6 +140,14 @@ int main(int argc, char* argv[])
         std::cout << "stdout: " << run.out() << std::endl;
         std::cout << "stderr: " << run.err() << std::endl;
     }
+
+    auto start = std::chrono::high_resolution_clock::now();
+    int repeat = 100;
+    for (int i = 0; i < repeat; i++)
+        auto run = PythonRun("i=1");
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = finish - start;
+    std::cout << "Elapsed Time per instance: " << elapsed.count() / repeat << " milliseconds" << std::endl;
 
     return 0;
 }
