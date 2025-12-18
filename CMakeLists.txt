@@ -13,4 +13,4 @@ target_include_directories(cpp PRIVATE ${CONDA_PREFIX}/include/python${PYTHON_VE
 target_link_libraries(cpp PRIVATE python${PYTHON_VERSION_MAJOR})
 target_link_directories(cpp PRIVATE ${CONDA_PREFIX}/lib)
 set_property(TARGET cpp PROPERTY CXX_STANDARD 17)
-file(COPY pythonfile.py DESTINATION .)
+configure_file(pythonfile.py . COPYONLY)
