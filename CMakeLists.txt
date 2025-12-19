@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5...4.0)
 project(python-from-fortran LANGUAGES CXX Fortran)
-add_executable(f main.f90)
+add_executable(f main.f90
+Python.f90)
 add_executable(cpp main.cpp
         PythonRun.cpp
         PythonRun.h)
@@ -15,4 +16,6 @@ target_include_directories(cpp PRIVATE ${CONDA_PREFIX}/include/python${PYTHON_VE
 target_link_libraries(cpp PRIVATE python${PYTHON_VERSION_MAJOR})
 target_link_directories(cpp PRIVATE ${CONDA_PREFIX}/lib)
 set_property(TARGET cpp PROPERTY CXX_STANDARD 17)
+target_link_libraries(f PRIVATE python${PYTHON_VERSION_MAJOR})
+target_link_directories(f PRIVATE ${CONDA_PREFIX}/lib)
 configure_file(pythonfile.py . COPYONLY)
