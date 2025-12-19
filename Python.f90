@@ -107,6 +107,7 @@ contains
     function script(self)
         class(PythonRun), intent(inout) :: self
         character(:), allocatable :: script
+        script = self%script_
     end function script
 
     FUNCTION c_string_c(fstring)

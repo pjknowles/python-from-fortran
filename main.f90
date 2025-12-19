@@ -10,7 +10,7 @@ subroutine one
     character(:), allocatable :: o
     call run%init(script = 'print("fortran!")')
     call run%run_string('print("another")')
-    print *,  run%out()
+    print *, run%out()
 
 end subroutine one
 
@@ -21,8 +21,9 @@ subroutine two
     call run%init()
     call run%run_string('print("two")')
     call run%run_string('1+a')
-    print *,  'out',run%out()
-    print *,  'err',run%err()
+    print *, 'script ', run%script()
+    print *, 'out ', run%out()
+    print *, 'err ', run%err()
 
 end subroutine two
 
@@ -32,8 +33,9 @@ subroutine three
     character(:), allocatable :: o
     character(1024) :: wd
     call getcwd(wd)
-    call run%init(script='from pythonfile import hello; hello("fortran programmer")', path=wd)
-    print *,  'out',run%out()
-    print *,  'err',run%err()
+    call run%init(script = 'from pythonfile import hello; hello("fortran programmer")', path = wd)
+    print *, 'script ', run%script()
+    print *, 'out ', run%out()
+    print *, 'err ', run%err()
 
 end subroutine three
