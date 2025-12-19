@@ -4,7 +4,7 @@ module Python
     type :: PythonRun
         character(:), allocatable, private :: script_
     contains
-        procedure, public :: init, add_path, load_module, run_string, out, err, script
+        procedure, public :: init, add_path, load_module, run_string, stdout, stderr, script
         final :: shutdown
     end type PythonRun
 
@@ -92,17 +92,17 @@ contains
         self%script_ = self%script_ // trim(str)
     end subroutine run_string
 
-    function out(self)
+    function stdout(self)
         class(PythonRun), intent(inout) :: self
-        character(:), allocatable :: out
-        out = c_string_p_f(PythonRun_stream(c_string_c('stdout')))
-    end function out
+        character(:), allocatable :: stdout
+        stdout = c_string_p_f(PythonRun_stream(c_string_c('stdout')))
+    end function stdout
 
-    function err(self)
+    function stderr(self)
         class(PythonRun), intent(inout) :: self
-        character(:), allocatable :: err
-        err = c_string_p_f(PythonRun_stream(c_string_c('stderr')))
-    end function err
+        character(:), allocatable :: stderr
+        stderr = c_string_p_f(PythonRun_stream(c_string_c('stderr')))
+    end function stderr
 
     function script(self)
         class(PythonRun), intent(inout) :: self

@@ -28,8 +28,8 @@ public:
                                      std::string path = "");
 
 
-    const std::string out() { return stream("stdout"); }
-    const std::string err() { return stream("stderr"); }
+    const std::string stdout() { return stream("stdout"); }
+    const std::string stderr() { return stream("stderr"); }
     const std::string& script() { return script_; }
 
 private:

@@ -5,7 +5,6 @@
 #include "PythonRun.h"
 
 
-
 auto load_and_call_python_function(char* person = NULL)
 {
     Py_Initialize();
@@ -39,23 +38,23 @@ int main(int argc, char* argv[])
         run.run_string("name='somebody'");
         run.run_string("print(name);1+a");
         std::cout << "script: " << run.script() << std::endl;
-        std::cout << "stdout: " << run.out() << std::endl;
-        std::cout << "stderr: " << run.err() << std::endl;
+        std::cout << "stdout: " << run.stdout() << std::endl;
+        std::cout << "stderr: " << run.stderr() << std::endl;
     }
 
     {
         auto run = PythonRun("from pythonfile import hello; hello('somebody')",
                              std::filesystem::current_path().string());
-        std::cout << "stdout: " << run.out() << std::endl;
-        std::cout << "stderr: " << run.err() << std::endl;
+        std::cout << "stdout: " << run.stdout() << std::endl;
+        std::cout << "stderr: " << run.stderr() << std::endl;
     }
 
     {
         auto run = PythonRun();
         std::cout << "returned " << run.run_str_str_function("hello", "pythonfile", "friend",
                                                              std::filesystem::current_path().string()) << std::endl;
-        std::cout << "stdout: " << run.out() << std::endl;
-        std::cout << "stderr: " << run.err() << std::endl;
+        std::cout << "stdout: " << run.stdout() << std::endl;
+        std::cout << "stderr: " << run.stderr() << std::endl;
     }
 
     {
