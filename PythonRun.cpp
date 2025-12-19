@@ -1,5 +1,9 @@
 #include "PythonRun.h"
+
+#include <iostream>
+#include <ostream>
 #include <Python.h>
+extern "C" char* PythonRun_stream(char*);
 
 PythonRun::PythonRun(std::string script, std::string path)
 {
@@ -59,11 +63,19 @@ std::string PythonRun::run_str_str_function(std::string function_name, std::stri
 
 std::string PythonRun::stream(char* name)
 {
-    PyObject* catcher = PyObject_GetAttrString(PyImport_ImportModule("sys"), name);
+    auto resultc = PythonRun_stream(name);
+    std::string result = std::string{resultc};
+    free(resultc);
+    return result;
+}
+extern  "C" char* PythonRun_stream(char* name)
+{
+    auto py_import_import_module = PyImport_ImportModule("sys");
+    PyObject* catcher = PyObject_GetAttrString(py_import_import_module, name);
     PyErr_Print();
     PyObject* output = PyObject_GetAttrString(catcher, "value");
     auto py_bytes_as_string = std::string{PyBytes_AS_STRING(PyUnicode_AsEncodedString(output,"utf-8","~E~"))};
     if (!py_bytes_as_string.empty() && py_bytes_as_string.back() == '\n')
         py_bytes_as_string.pop_back();
-    return py_bytes_as_string;
+    return strdup(py_bytes_as_string.c_str());
 }
