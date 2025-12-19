@@ -37,8 +37,8 @@ contains
                         '    self.value = ""' // new_line(' ') // &
                         '  def write(self, txt):' // new_line(' ') // &
                         '    self.value += txt' // new_line(' ') // &
-                        '    sys.stdout = CatchOutErr()' // new_line(' ') // &
-                        '    sys.stderr = CatchOutErr()' // new_line(' ')))
+                        'sys.stdout = CatchOutErr()' // new_line(' ') // &
+                        'sys.stderr = CatchOutErr()' // new_line(' ')))
         if (present(script)) then
             call self%run_string(script)
         end if
