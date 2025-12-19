@@ -17,6 +17,22 @@ module Python
             use iso_c_binding, only : c_char
             CHARACTER(kind = c_char), DIMENSION(*) :: script
         end subroutine PyRun_SimpleString
+        function PyImport_ImportModule(name) bind(C, name='PyImport_ImportModule')
+            use iso_c_binding, only: c_ptr, c_char
+            type(c_ptr) :: PyImport_ImportModule
+            character(kind=c_char), dimension(*), intent(in) :: name
+        end function PyImport_ImportModule
+        function PyObject_Unicode_asEncodedString(ptr) result(res)
+            use iso_c_binding, only: c_ptr
+            type(c_ptr) :: res
+            type(c_ptr), intent(in) :: ptr
+        end function PyObject_Unicode_asEncodedString
+        function PyObject_GetAttrString(ptr, name) bind(C, name='PyObject_GetAttrString')
+            use iso_c_binding, only: c_ptr, c_char
+            type(c_ptr) :: PyObject_GetAttrString
+            type(c_ptr), intent(in) :: ptr
+            character(kind=c_char), dimension(*), intent(in) :: name
+        end function PyObject_GetAttrString
     end interface
 
 contains
@@ -72,19 +88,30 @@ contains
     function out(self)
         class(PythonRun), intent(inout) :: self
         character(:), allocatable :: out
-        out = 'not implemented'
+        out = stream(self, 'stdout')
     end function out
 
     function err(self)
         class(PythonRun), intent(inout) :: self
         character(:), allocatable :: err
-        err = 'not implemented'
+        err = stream(self, 'stderr')
     end function err
 
     function script(self)
         class(PythonRun), intent(inout) :: self
         character(:), allocatable :: script
     end function script
+
+    function stream(self, name)
+        use iso_c_binding, only: c_ptr, c_null_ptr
+        class(PythonRun), intent(inout) :: self
+        character(*), intent(in) :: name
+        character(:), allocatable :: stream
+        type(c_ptr) :: ptr
+        stream = 'not implemented'
+        ptr = PyImport_ImportModule(c_string_c('sys'))
+        ptr = PyObject_GetAttrString(ptr, c_string_c(name))
+    end function stream
 
     FUNCTION c_string_c(fstring)
         use iso_c_binding, only : c_char, c_null_char
@@ -97,5 +124,6 @@ contains
         END DO
         c_string_c(len_TRIM(fstring) + 1) = c_null_char
     END FUNCTION c_string_c
+
 
 end module Python
