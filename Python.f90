@@ -17,28 +17,28 @@ module Python
             use iso_c_binding, only : c_char
             CHARACTER(kind = c_char), DIMENSION(*) :: script
         end subroutine PyRun_SimpleString
-        function PyImport_ImportModule(name) bind(C, name='PyImport_ImportModule')
-            use iso_c_binding, only: c_ptr, c_char
+        function PyImport_ImportModule(name) bind(C, name = 'PyImport_ImportModule')
+            use iso_c_binding, only : c_ptr, c_char
             type(c_ptr) :: PyImport_ImportModule
-            character(kind=c_char), dimension(*), intent(in) :: name
+            character(kind = c_char), dimension(*), intent(in) :: name
         end function PyImport_ImportModule
         function PyObject_Unicode_asEncodedString(ptr) result(res)
-            use iso_c_binding, only: c_ptr
+            use iso_c_binding, only : c_ptr
             type(c_ptr) :: res
             type(c_ptr), intent(in) :: ptr
         end function PyObject_Unicode_asEncodedString
-        function PyObject_GetAttrString(ptr, name) bind(C, name='PyObject_GetAttrString')
-            use iso_c_binding, only: c_ptr, c_char
+        function PyObject_GetAttrString(ptr, name) bind(C, name = 'PyObject_GetAttrString')
+            use iso_c_binding, only : c_ptr, c_char
             type(c_ptr) :: PyObject_GetAttrString
             type(c_ptr), intent(in) :: ptr
-            character(kind=c_char), dimension(*), intent(in) :: name
+            character(kind = c_char), dimension(*), intent(in) :: name
         end function PyObject_GetAttrString
-        subroutine PyErr_Print() bind(C,name='PyErr_Print')
+        subroutine PyErr_Print() bind(C, name = 'PyErr_Print')
         end subroutine PyErr_Print
-        function PythonRun_stream(name) bind(C, name='PythonRun_stream')
-            use iso_c_binding, only: c_char, c_ptr
-            type(c_ptr):: PythonRun_stream
-            character(kind=c_char), dimension(*) :: name
+        function PythonRun_stream(name) bind(C, name = 'PythonRun_stream')
+            use iso_c_binding, only : c_char, c_ptr
+            type(c_ptr) :: PythonRun_stream
+            character(kind = c_char), dimension(*) :: name
         end function PythonRun_stream
     end interface
 
@@ -95,13 +95,13 @@ contains
     function out(self)
         class(PythonRun), intent(inout) :: self
         character(:), allocatable :: out
-        out = c_string_p_f( PythonRun_stream(c_string_c('stdout')) )
+        out = c_string_p_f(PythonRun_stream(c_string_c('stdout')))
     end function out
 
     function err(self)
         class(PythonRun), intent(inout) :: self
         character(:), allocatable :: err
-        err = c_string_p_f( PythonRun_stream(c_string_c('stderr')) )
+        err = c_string_p_f(PythonRun_stream(c_string_c('stderr')))
     end function err
 
     function script(self)
@@ -123,41 +123,41 @@ contains
     END FUNCTION c_string_c
 
     !> @brief Convert to Fortran string from C string
-    SUBROUTINE c_string_to_f(cstring,fstring)
-        use iso_c_binding, only: c_char, c_null_char
-        CHARACTER(kind=c_char), DIMENSION(*), INTENT(in) :: cstring !< The null-terminated string to be converted.
+    SUBROUTINE c_string_to_f(cstring, fstring)
+        use iso_c_binding, only : c_char, c_null_char
+        CHARACTER(kind = c_char), DIMENSION(*), INTENT(in) :: cstring !< The null-terminated string to be converted.
         CHARACTER(*), INTENT(inout) :: fstring !< The fortran string to hold the result. If its length is shorter than cstring, there
         !< will be truncation.
         INTEGER :: i
-        fstring=' '
-        DO i=1,LEN(fstring)
+        fstring = ' '
+        DO i = 1, LEN(fstring)
             IF (cstring(i).EQ.C_NULL_CHAR) EXIT
-            fstring(i:i)=cstring(i)
+            fstring(i:i) = cstring(i)
         END DO
     END SUBROUTINE c_string_to_f
     !> @brief Convenience function to convert to Fortran string from C char* contained in c_ptr
     FUNCTION c_string_p_f(cp)
-        use iso_c_binding, only: c_ptr, c_char, c_f_pointer
+        use iso_c_binding, only : c_ptr, c_char, c_f_pointer
         CHARACTER(:), ALLOCATABLE :: c_string_p_f
         TYPE(c_ptr), INTENT(in) :: cp
         CHARACTER(c_char), DIMENSION(:), POINTER :: sp
-        CALL c_f_POINTER(cp,sp,[1])
+        CALL c_f_POINTER(cp, sp, [1])
         c_string_p_f = c_string_f(sp)
     END FUNCTION c_string_p_f
     !> @brief Convenience function to convert to Fortran string from C string
     FUNCTION c_string_f(cstring)
-        use iso_c_binding, only: c_char, c_int8_t
+        use iso_c_binding, only : c_char, c_int8_t
         CHARACTER(:), ALLOCATABLE :: c_string_f, c_null_char
-        CHARACTER(kind=c_char), DIMENSION(*), INTENT(in) :: cstring !< The null-terminated string to be converted.
+        CHARACTER(kind = c_char), DIMENSION(*), INTENT(in) :: cstring !< The null-terminated string to be converted.
         INTEGER :: i
         integer(c_int8_t) :: i1
-        DO i=0,1000000000
-            IF (cstring(i+1).EQ.C_NULL_CHAR .or. transfer(cstring(i+1),i1).eq.0) goto 1
+        DO i = 0, 1000000000
+            IF (cstring(i + 1).EQ.C_NULL_CHAR .or. transfer(cstring(i + 1), i1).eq.0) goto 1
         END DO
         stop 'Unterminated C-style string in c_string::c_string_f'
         1 CONTINUE
-        ALLOCATE(CHARACTER(len=i) :: c_string_f)
-        CALL c_string_to_f(cstring,c_string_f)
+        ALLOCATE(CHARACTER(len = i) :: c_string_f)
+        CALL c_string_to_f(cstring, c_string_f)
     END FUNCTION c_string_f
 
 end module Python
