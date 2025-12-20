@@ -17,24 +17,6 @@ module Python
             use iso_c_binding, only : c_char
             CHARACTER(kind = c_char), DIMENSION(*) :: script
         end subroutine PyRun_SimpleString
-        function PyImport_ImportModule(name) bind(C, name = 'PyImport_ImportModule')
-            use iso_c_binding, only : c_ptr, c_char
-            type(c_ptr) :: PyImport_ImportModule
-            character(kind = c_char), dimension(*), intent(in) :: name
-        end function PyImport_ImportModule
-        function PyObject_Unicode_asEncodedString(ptr) result(res)
-            use iso_c_binding, only : c_ptr
-            type(c_ptr) :: res
-            type(c_ptr), intent(in) :: ptr
-        end function PyObject_Unicode_asEncodedString
-        function PyObject_GetAttrString(ptr, name) bind(C, name = 'PyObject_GetAttrString')
-            use iso_c_binding, only : c_ptr, c_char
-            type(c_ptr) :: PyObject_GetAttrString
-            type(c_ptr), intent(in) :: ptr
-            character(kind = c_char), dimension(*), intent(in) :: name
-        end function PyObject_GetAttrString
-        subroutine PyErr_Print() bind(C, name = 'PyErr_Print')
-        end subroutine PyErr_Print
         function PythonRun_stream(name) bind(C, name = 'PythonRun_stream')
             use iso_c_binding, only : c_char, c_ptr
             type(c_ptr) :: PythonRun_stream
