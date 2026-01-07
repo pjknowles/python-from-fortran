@@ -33,7 +33,7 @@ public:
     const std::string& script() { return script_; }
 
 private:
-    std::string stream(char* name);
+    const std::string stream(const char* name);
     std::string script_;
 };
 

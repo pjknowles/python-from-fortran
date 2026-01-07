@@ -3,7 +3,7 @@
 #include <iostream>
 #include <ostream>
 #include <Python.h>
-extern "C" char* PythonRun_stream(char*);
+extern "C" const char* PythonRun_stream(const char*);
 
 PythonRun::PythonRun(std::string script, std::string path)
 {
@@ -61,14 +61,14 @@ std::string PythonRun::run_str_str_function(std::string function_name, std::stri
     return std::string{PyBytes_AS_STRING(PyUnicode_AsEncodedString(PyObject_Str(callfunc),"utf-8","~E~"))};
 }
 
-std::string PythonRun::stream(char* name)
+const std::string PythonRun::stream(const char* name)
 {
-    auto resultc = PythonRun_stream(name);
+    const char* resultc = PythonRun_stream(name);
     std::string result = std::string{resultc};
-    free(resultc);
+    free(const_cast<char*>(resultc));
     return result;
 }
-extern  "C" char* PythonRun_stream(char* name)
+extern  "C" const char* PythonRun_stream(const char* name)
 {
     auto py_import_import_module = PyImport_ImportModule("sys");
     PyObject* catcher = PyObject_GetAttrString(py_import_import_module, name);
