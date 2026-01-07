@@ -5,7 +5,7 @@
 #include "PythonRun.h"
 
 
-auto load_and_call_python_function(char* person = NULL)
+auto load_and_call_python_function(const char* person = NULL)
 {
     Py_Initialize();
     auto name = PyUnicode_FromString("pythonfile");
