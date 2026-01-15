@@ -10,9 +10,10 @@ set_property(TARGET PythonRun PROPERTY CXX_STANDARD 17)
 
 if (USE_FINDPYTHON)
     # actual
-    find_package(Python COMPONENTS Development)
-    target_link_libraries(PythonRun PUBLIC Python::Python)
-    message(STATUS "Python version ${Python_VERSION} from ${Python_INCLUDE_DIRS}")
+    # cmake_policy(SET CMP0094 OLD)
+    find_package(Python3 COMPONENTS Development)
+    target_link_libraries(PythonRun PUBLIC Python3::Python)
+    message(STATUS "Python version ${Python3_VERSION} from ${Python3_INCLUDE_DIRS}")
 else ()
     # illustrative
     execute_process(COMMAND python3 --version OUTPUT_VARIABLE PYTHON_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
