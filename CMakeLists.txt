@@ -8,11 +8,18 @@ add_library(PythonRun
         PythonRun.h)
 set_property(TARGET PythonRun PROPERTY CXX_STANDARD 17)
 
+add_library(PythonC
+        PythonC.h
+        PythonC.cpp
+)
+set_property(TARGET PythonC PROPERTY CXX_STANDARD 17)
+
 if (USE_FINDPYTHON)
     # actual
     # cmake_policy(SET CMP0094 OLD)
     find_package(Python3 COMPONENTS Development)
     target_link_libraries(PythonRun PUBLIC Python3::Python)
+    target_link_libraries(PythonC PRIVATE Python3::Python)
     message(STATUS "Python version ${Python3_VERSION} from ${Python3_INCLUDE_DIRS}")
 else ()
     # illustrative
@@ -39,7 +46,7 @@ add_executable(cpp main.cpp)
 target_link_libraries(cpp PRIVATE PythonRun)
 set_property(TARGET cpp PROPERTY CXX_STANDARD 17)
 
-add_executable(f main.f90 Python.f90)
-target_link_libraries(f PRIVATE PythonRun)
+add_executable(f main.f90 Python.f90 Python_OO.f90)
+target_link_libraries(f PRIVATE PythonRun PythonC)
 
 configure_file(pythonfile.py . COPYONLY)

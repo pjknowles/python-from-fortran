@@ -1,47 +1,16 @@
-module Python
+module Python_OO
     private
-    public :: Python_initialise, Python_run, Python_add_path, Python_load_module
-    public :: Python_stdout, Python_stderr, Python_shutdown, Python_script
-#ifdef fort
-    character(:), allocatable, private :: script_
-    logical, private :: Python_initialised = .false.
-#endif
-#ifdef sentinel
-    type :: Python_sentinel
-        contains
+    public :: PythonRun
+    type :: PythonRun
+        character(:), allocatable, private :: script_
+        logical, private :: initialised = .false.
+    contains
+        procedure, public :: init, add_path, load_module, run_string, stdout, stderr, script
         final :: shutdown
-    end type Python_sentinel
-    type(Python_sentinel) :: sentinel
-#endif
+    end type PythonRun
 
-    interface
-        subroutine PythonC_Initialize() bind(C, name = 'PythonC_Initialize')
-        end subroutine PythonC_Initialize
-        subroutine PythonC_Shutdown() bind(C, name = 'PythonC_Shutdown')
-        end subroutine PythonC_Shutdown
-        subroutine PythonC_Run(script) bind(C, name = 'PythonC_Run')
-            use iso_c_binding, only : c_char
-            character(kind = c_char), dimension(*) :: script
-        end subroutine PythonC_Run
-        subroutine PythonC_LoadModule(name) bind(C, name = 'PythonC_LoadModule')
-            use iso_c_binding, only : c_char
-            character(kind = c_char), dimension(*) :: name
-        end subroutine PythonC_LoadModule
-        function PythonC_stdout() bind(C, name = 'PythonC_stdout')
-            use iso_c_binding, only : c_ptr
-            type(c_ptr) :: PythonC_stdout
-        end function PythonC_stdout
-        function PythonC_stderr() bind(C, name = 'PythonC_stderr')
-            use iso_c_binding, only : c_ptr
-            type(c_ptr) :: PythonC_stderr
-        end function PythonC_stderr
-        function PythonC_Script() bind(C, name = 'PythonC_Script')
-            use iso_c_binding, only : c_ptr
-            type(c_ptr) :: PythonC_Script
-        end function PythonC_Script
-    end interface
+    logical :: PythonRun_active = .false.
 
-#ifdef fort
     interface
         subroutine Py_Initialize() bind(C, name = 'Py_Initialize')
         end subroutine Py_Initialize
@@ -57,24 +26,18 @@ module Python
             character(kind = c_char), dimension(*) :: name
         end function PythonRun_stream
     end interface
-#endif
 
 contains
-    subroutine Python_initialise(script, path)
+    subroutine init(self, script, path)
         use iso_c_binding, only : c_null_char
+        class(PythonRun), intent(inout) :: self
         character(*), intent(in), optional :: script
         character(*), intent(in), optional :: path
-#ifdef fort
-        if (Python_initialised) call Python_shutdown
         call Py_Initialize();
-        script_ = ''
-#else
-        call PythonC_Initialize
-#endif
+        self%script_ = ''
         if (present(path)) then
-            call Python_add_path(path)
+            call self%add_path(path)
         end if
-#ifdef fort
         call PyRun_SimpleString(c_string_c(&
                 'import sys' // new_line(' ') // &
                         'class CatchOutErr:' // new_line(' ') // &
@@ -84,81 +47,56 @@ contains
                         '    self.value += txt' // new_line(' ') // &
                         'sys.stdout = CatchOutErr()' // new_line(' ') // &
                         'sys.stderr = CatchOutErr()' // new_line(' ')))
-        Python_initialised = .true.
-#endif
         if (present(script)) then
-            call Python_run(script)
+            call self%run_string(script)
         end if
-    end subroutine Python_initialise
+        self%initialised = .true.
+    end subroutine init
 
-    subroutine Python_shutdown()
-#ifdef fort
-        if (Python_initialised) call Py_Finalize
-        Python_initialised = .false.
-#else
-        call PythonC_Shutdown
-#endif
-    end subroutine Python_shutdown
-
-    subroutine Python_add_path(path)
-        character(*), intent(in) :: path
-        call Python_run('import sys; sys.path.append("' // trim(path) // '")')
-    end subroutine Python_add_path
-
-    subroutine Python_load_module(name)
-        character(*), intent(in) :: name
-#ifdef fort
-        call Python_run('import ' // trim(name) // '")')
-#else
-        call PythonC_LoadModule(c_string_c(name))
-#endif
-    end subroutine Python_load_module
-
-    subroutine Python_run(str)
-        character(*), intent(in) :: str
-#ifdef fort
-        if (.not. Python_initialised) call Python_initialise
-        call PyRun_SimpleString(c_string_c(str))
-        if (script_ .ne. '') script_ = script_ // new_line(' ')
-        script_ = script_ // trim(str)
-#else
-        call PythonC_Run(c_string_c(str))
-#endif
-    end subroutine Python_run
-
-    function Python_stdout()
-        character(:), allocatable :: Python_stdout
-#ifdef fort
-        Python_stdout = c_string_p_f(PythonRun_stream(c_string_c('stdout')))
-#else
-        Python_stdout = c_string_p_f(PythonC_stdout())
-#endif
-    end function Python_stdout
-
-    function Python_stderr()
-        character(:), allocatable :: Python_stderr
-#ifdef fort
-        Python_stderr = c_string_p_f(PythonRun_stream(c_string_c('stderr')))
-#else
-        Python_stderr = c_string_p_f(PythonC_stderr())
-#endif
-    end function Python_stderr
-
-    function Python_script()
-        character(:), allocatable :: Python_script
-#ifdef fort
-        Python_script = script_
-#else
-        Python_script = c_string_p_f(PythonC_Script())
-#endif
-    end function Python_script
-
-#ifdef sentinel
     subroutine shutdown(self)
-        type(Python_sentinel), intent(inout) :: self
-        call Python_shutdown
+        type(PythonRun), intent(inout) :: self
+        call Py_Finalize
+        self%initialised = .false.
     end subroutine shutdown
-#endif
+
+    subroutine add_path(self, path)
+        class(PythonRun), intent(inout) :: self
+        character(*), intent(in) :: path
+        call self%run_string('import sys; sys.path.append("' // trim(path) // '")')
+    end subroutine add_path
+
+    subroutine load_module(self, name)
+        class(PythonRun), intent(inout) :: self
+        character(*), intent(in) :: name
+        call self%run_string('import ' // trim(name) // '")')
+    end subroutine load_module
+
+    subroutine run_string(self, str)
+        class(PythonRun), intent(inout) :: self
+        character(*), intent(in) :: str
+        if (.not. self%initialised) call self%init
+        call PyRun_SimpleString(c_string_c(str))
+        if (self%script_ .ne. '') self%script_ = self%script_ // new_line(' ')
+        self%script_ = self%script_ // trim(str)
+    end subroutine run_string
+
+    function stdout(self)
+        class(PythonRun), intent(inout) :: self
+        character(:), allocatable :: stdout
+        stdout = c_string_p_f(PythonRun_stream(c_string_c('stdout')))
+    end function stdout
+
+    function stderr(self)
+        class(PythonRun), intent(inout) :: self
+        character(:), allocatable :: stderr
+        stderr = c_string_p_f(PythonRun_stream(c_string_c('stderr')))
+    end function stderr
+
+    function script(self)
+        class(PythonRun), intent(inout) :: self
+        character(:), allocatable :: script
+        script = self%script_
+    end function script
 
     FUNCTION c_string_c(fstring)
         use iso_c_binding, only : c_char, c_null_char
@@ -210,4 +148,4 @@ contains
         CALL c_string_to_f(cstring, c_string_f)
     END FUNCTION c_string_f
 
-end module Python
+end module Python_OO
